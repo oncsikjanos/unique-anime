@@ -1,7 +1,7 @@
 import {Component, Input, SimpleChanges} from '@angular/core';
 import {FirestoreService} from "../../../services/firestore.service";
 import {Observable} from "rxjs";
-import {AsyncPipe, CommonModule} from "@angular/common";
+import { AsyncPipe, CommonModule } from "@angular/common";
 import {MatCard} from "@angular/material/card";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIcon} from "@angular/material/icon";
