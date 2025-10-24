@@ -1,0 +1,11 @@
+<mat-card class="user-container" [ngStyle]="{'background-color': color}">
+  <div class="user-placement-pfp-holder">
+    <div class="user-placement">{{placement}}</div>
+    <div class="user-pfp">
+      <img [src]='user.pfp == null ? "assets/images/mate.jpg" : user.pfp' [alt]="user.name+' pfp'"/>
+    </div>
+  </div>
+  <div class="user-name">{{user.name}}</div>
+  <div class="user-completed">Completed: {{user.completed}}</div>
+  <div class="user-unique">Unique: {{user.unique}}</div>
+</mat-card>

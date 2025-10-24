@@ -1,0 +1,26 @@
+.whole-page {
+  display: flex;
+  flex-direction: row;
+
+}
+
+.user-list-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  width: fit-content;
+  margin: auto;
+}
+
+.anime-list{
+  display: flex;
+  margin: auto;
+  width: fit-content;
+  justify-content: center;
+}
+
+.info-text{
+  text-align: center;
+  min-width: 100%;
+  font-size: xxx-large;
+}
