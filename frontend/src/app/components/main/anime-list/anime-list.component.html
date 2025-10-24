@@ -16,11 +16,12 @@
         <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_up</mat-icon></button>
       }
       @else{
-        <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_down</mat-icon></button>
-      }
-    </div>
+      <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_down</mat-icon></button>
+    }
+  </div>
+  @for (anime of (animes$ | async); track anime) {
     <a class="anime-holder" target="_blank"
-       [href]="'https://myanimelist.net/anime/'+anime.id" *ngFor="let anime of (animes$ | async)">
+      [href]="'https://myanimelist.net/anime/'+anime.id">
       <div class="picture-name-holder">
         <div class="anime-picture">
           <img [src]="anime.picture" [alt]="anime.title+' picture'"/>
@@ -29,5 +30,6 @@
       </div>
       <div class="anime-rating">{{anime.rating}}</div>
     </a>
-  </div>
+  }
+</div>
 </mat-card>
