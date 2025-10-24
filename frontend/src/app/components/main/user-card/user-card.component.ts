@@ -3,14 +3,13 @@ import {MatCard} from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-user-card',
-  standalone: true,
-  imports: [
-    MatCard,
-    CommonModule
-  ],
-  templateUrl: './user-card.component.html',
-  styleUrl: './user-card.component.scss'
+    selector: 'app-user-card',
+    imports: [
+        MatCard,
+        CommonModule
+    ],
+    templateUrl: './user-card.component.html',
+    styleUrl: './user-card.component.scss'
 })
 export class UserCardComponent {
   defaultUser = {'pfp': 's', 'name': 's', 'completed': 1, 'unique': 1}

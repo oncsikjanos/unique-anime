@@ -9,19 +9,18 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatSelectModule} from "@angular/material/select";
 
 @Component({
-  selector: 'app-anime-list',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    CommonModule,
-    MatCard,
-    MatButtonModule,
-    MatIcon,
-    MatFormFieldModule,
-    MatSelectModule
-  ],
-  templateUrl: './anime-list.component.html',
-  styleUrl: './anime-list.component.scss'
+    selector: 'app-anime-list',
+    imports: [
+        AsyncPipe,
+        CommonModule,
+        MatCard,
+        MatButtonModule,
+        MatIcon,
+        MatFormFieldModule,
+        MatSelectModule
+    ],
+    templateUrl: './anime-list.component.html',
+    styleUrl: './anime-list.component.scss'
 })
 export class AnimeListComponent {
   animes$: Observable<any[]>;
