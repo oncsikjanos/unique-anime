@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap');
+
+.user-container{
+  display: flex;
+  flex-direction: row;
+  height: fit-content;
+  width: 60vw;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: 5% 95% 5% 95% / 95% 5% 95% 5%;
+  padding: 5px;
+  position: relative;
+  box-shadow: -18px 25px 30px -7px rgba(0,0,0,0.75);
+  margin: 5px
+}
+
+.user-placement{
+  margin: 20px !important;
+}
+
+.user-container:hover {
+  /* Hover styles */
+  box-shadow: 0 8px 16px rgba(0, 0, 255, 0.6);
+  transform: scale(1.05);
+  z-index: 1;
+  cursor: pointer;
+}
+
+.user-placement-pfp-holder{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  gap: 20px;
+}
+
+img {
+  width: 100px;
+  aspect-ratio: 1 / 1;
+  border-radius: 5px;
+}
+
+.user-container > div {
+  margin: 10px !important;
+}
+
+.user-name, .user-completed, .user-unique, .user-placement{
+  font-size: 30px;
+}
+
+div {
+  font-weight: 400;
+  font-style: normal;
+  font-family: "New Amsterdam", sans-serif;
+}
+
+.user-name, .user-completed, .user-unique{
+  display: flex;
+  width: 160px;
+  justify-content: center;
+}

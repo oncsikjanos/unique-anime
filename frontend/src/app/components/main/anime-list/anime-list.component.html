@@ -1,0 +1,33 @@
+<mat-card class="anime-list">
+  <div class="list-header">
+    {{ user }} unique animes
+  </div>
+  <div class="anime-container">
+    <div class="sort-header">
+      <div class="order-selector">
+        <label>Order by:</label>
+        <mat-select [(value)]="selectedOrder" (valueChange)="onSelectionChange()">
+          @for(order of orders; track order){
+            <mat-option [value]="order.value">{{order.viewValue}}</mat-option>
+          }
+        </mat-select>
+      </div>
+      @if(increase){
+        <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_up</mat-icon></button>
+      }
+      @else{
+        <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_down</mat-icon></button>
+      }
+    </div>
+    <a class="anime-holder" target="_blank"
+       [href]="'https://myanimelist.net/anime/'+anime.id" *ngFor="let anime of (animes$ | async)">
+      <div class="picture-name-holder">
+        <div class="anime-picture">
+          <img [src]="anime.picture" [alt]="anime.title+' picture'"/>
+        </div>
+        <div class="anime-name">{{anime.title}}</div>
+      </div>
+      <div class="anime-rating">{{anime.rating}}</div>
+    </a>
+  </div>
+</mat-card>

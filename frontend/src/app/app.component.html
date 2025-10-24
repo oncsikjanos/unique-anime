@@ -1,0 +1,17 @@
+<header>
+  <h1 class="info-text">Database last updated: 2025.03.08.</h1>
+</header>
+<body>
+<div class="whole-page">
+  <div class="user-list-container">
+    <app-user-card [user]="user"
+                   [placement]="i+1"
+                   *ngFor="let user of (users$ | async) let i = index"
+                   (click)="onUserCardClick(user)"
+                   [class.selected]="isSelected(user)"></app-user-card>
+  </div>
+  <div class="anime-list">
+    <app-anime-list [user]="selectedUser.name"></app-anime-list>
+  </div>
+</div>
+</body>
