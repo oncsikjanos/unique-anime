@@ -14,11 +14,10 @@ interface User {
 }
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, UserCardComponent, CommonModule, AnimeListComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+    selector: 'app-root',
+    imports: [RouterOutlet, UserCardComponent, CommonModule, AnimeListComponent],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent {
   title = 'unique-anime';
