@@ -50,3 +50,4 @@ Thumbs.db
 firebase.json
 
 .env
+./node_modules/
