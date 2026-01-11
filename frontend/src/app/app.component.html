@@ -4,7 +4,7 @@
 <body>
   <div class="whole-page">
     <div class="user-list-container">
-      @for (user of (users$ | async) let i = index; track user) {
+      @for (user of (users$ | async); let i = $index; track user) {
         <app-user-card [user]="user"
           [placement]="i+1"
           (click)="onUserCardClick(user)"
