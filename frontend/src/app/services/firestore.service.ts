@@ -17,12 +17,15 @@ export class FirestoreService {
 
   constructor() { }
 
-  getUserList(): Observable<User[]> {
+  getUserList(): Observable<any[]> {
     const userCollection = collection(this.firestore, 'User')
-    return collectionData(userCollection) as Observable<User[]>;
+    return collectionData(userCollection) as Observable<any[]>;
   }
 
   getAnimeList(user: string): Observable<any[]> {
+    if (!user || user.trim() === '') {
+      return new Observable(subscriber => subscriber.next([])); // Return empty list if no user
+    }
     const animeCollection = collection(this.firestore, "Anime/"+user+"/Uniques")
     return collectionData(animeCollection)
   }

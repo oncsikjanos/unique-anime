@@ -31,18 +31,16 @@ export class AnimeListComponent {
   selectedOrder = "name";
   increase = false
 
-  @Input({'required': true}) user = "szbalcsi"
+  @Input({'required': true}) user: string = "";
 
   constructor(private fsService: FirestoreService) {
     this.animes$ = fsService.getAnimeList(this.user);
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['user']) {
       this.animes$ = this.fsService.getAnimeList(this.user);
     }
-
   }
 
   onSelectionChange(){
