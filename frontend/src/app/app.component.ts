@@ -20,17 +20,18 @@ interface User {
 })
 export class AppComponent {
   title = 'unique-anime';
-  users$: Observable<User[]>;
-  animes$: Observable<any[]>;
+  users$: Observable<any[]>;
+  animes$: Observable<any[]> | null = null;
   count = 1;
-  selectedUser: any = "";
+  selectedUser: any = "szbalcsi";
 
   constructor(private fsService: FirestoreService){
     this.users$ = this.fsService.getUserList().pipe(
-      map((users: User[]) => users.sort((a: User, b: User) => b.unique - a.unique))
+      map((users: any[]) => users.sort((a: any, b: any) => b.unique - a.unique))
     );
-    this.animes$ = this.fsService.getAnimeList("");
-    this.selectedUser = ""
+    //console.log(this.users$);
+    //this.animes$ = this.fsService.getAnimeList("");
+    //this.selectedUser = ""
   }
 
   onUserCardClick(user: User): void {

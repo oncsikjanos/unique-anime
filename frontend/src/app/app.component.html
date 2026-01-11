@@ -12,7 +12,11 @@
       }
     </div>
     <div class="anime-list">
-      <app-anime-list [user]="selectedUser.name"></app-anime-list>
+      @if (selectedUser) {
+        <app-anime-list [user]="selectedUser.name"></app-anime-list>
+      } @else {
+        <div class="placeholder">Select a user to view anime list</div>
+      }
     </div>
   </div>
 </body>
