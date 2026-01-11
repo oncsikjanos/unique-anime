@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { UserCardComponent } from "./components/main/user-card/user-card.component";
 import {map, Observable} from 'rxjs';
 import { FirestoreService } from './services/firestore.service';
@@ -15,7 +14,7 @@ interface User {
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, UserCardComponent, CommonModule, AnimeListComponent],
+    imports: [UserCardComponent, CommonModule, AnimeListComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })
