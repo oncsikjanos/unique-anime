@@ -19,6 +19,15 @@
       <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_down</mat-icon></button>
     }
   </div>
+  <div class="search-box">
+      <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange()"
+              placeholder="Search anime..."
+              class="search-input"
+      />
+  </div>
   @for (anime of (animes$ | async); track anime) {
     <a class="anime-holder" target="_blank"
       [href]="'https://myanimelist.net/anime/'+anime.id">
