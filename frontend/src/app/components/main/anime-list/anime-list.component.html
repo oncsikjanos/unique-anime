@@ -1,6 +1,9 @@
 <mat-card class="anime-list">
   <div class="list-header">
-    {{ user }} unique animes
+      <h2>{{ user }} unique animes</h2>
+      <button mat-icon-button (click)="listClosed.emit()">
+        <mat-icon>close</mat-icon>
+      </button>
   </div>
   <div class="anime-container">
     <div class="sort-header">
@@ -12,7 +15,7 @@
           }
         </mat-select>
       </div>
-      @if(increase){
+      @if (increase){
         <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_up</mat-icon></button>
       }
       @else{

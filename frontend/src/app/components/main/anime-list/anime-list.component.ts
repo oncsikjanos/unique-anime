@@ -1,4 +1,4 @@
-import {Component, Input, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
 import {FirestoreService} from "../../../services/firestore.service";
 import {map, Observable} from "rxjs";
 import { AsyncPipe, CommonModule } from "@angular/common";
@@ -25,6 +25,8 @@ import {FormsModule} from "@angular/forms";
     styleUrl: './anime-list.component.scss'
 })
 export class AnimeListComponent {
+  @Output() listClosed = new EventEmitter<void>();
+
   animes$: Observable<any[]>;
   orders= [
     {value: 'name', viewValue: 'Name'},
