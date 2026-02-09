@@ -4,13 +4,9 @@ import {map, Observable} from 'rxjs';
 import { FirestoreService } from './services/firestore.service';
 import { CommonModule } from '@angular/common';
 import {AnimeListComponent} from "./components/main/anime-list/anime-list.component";
+import {Anime} from "./models/Anime";
+import {User} from "./models/User";
 
-interface User {
-  name: string;
-  pfp: string;
-  completed: number;
-  unique: number;
-}
 
 @Component({
     selector: 'app-root',
@@ -20,14 +16,14 @@ interface User {
 })
 export class AppComponent {
   title = 'unique-anime';
-  users$: Observable<any[]>;
-  animes$: Observable<any[]> | null = null;
+  users$: Observable<User[]>;
+  animes$: Observable<Anime[]> | null = null;
   count = 1;
   selectedUser: User | null = null;
 
   constructor(private fsService: FirestoreService){
     this.users$ = this.fsService.getUserList().pipe(
-      map((users: any[]) => users.sort((a: any, b: any) => b.unique - a.unique))
+      map((users: User[]) => users.sort((a: User, b: User) => b.unique - a.unique))
     );
     //console.log(this.users$);
     //this.animes$ = this.fsService.getAnimeList("");
@@ -35,7 +31,6 @@ export class AppComponent {
   }
 
   onUserCardClick(user: User): void {
-    console.log("CLIECKED"+user.name)
     this.selectedUser = user;
   }
 

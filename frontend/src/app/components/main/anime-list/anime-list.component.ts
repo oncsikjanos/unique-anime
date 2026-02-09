@@ -8,6 +8,7 @@ import {MatIcon} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatSelectModule} from "@angular/material/select";
 import {FormsModule} from "@angular/forms";
+import {Anime} from "../../../models/Anime";
 
 @Component({
     selector: 'app-anime-list',
@@ -69,10 +70,10 @@ export class AnimeListComponent {
     return this.sortAnimes(filtered);
   }
 
-  private sortAnimes(animes: any[]): any[] {
-    const sorted = [...animes].sort((a: any, b: any) => {
-      let compareA: any;
-      let compareB: any;
+  private sortAnimes(animes: Anime[]): Anime[] {
+    return [...animes].sort((a: Anime, b: Anime) => {
+      let compareA: string | number;
+      let compareB: string | number;
 
       if (this.selectedOrder === 'name') {
         compareA = a.title?.toLowerCase() || '';
@@ -89,8 +90,6 @@ export class AnimeListComponent {
       }
       return 0;
     });
-
-    return sorted;
   }
 
   onSelectionChange(){

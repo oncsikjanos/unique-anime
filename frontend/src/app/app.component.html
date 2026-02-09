@@ -12,7 +12,9 @@
     </div>
     @if (selectedUser) {
         <div class="anime-list">
-            <app-anime-list [user]="selectedUser.name"></app-anime-list>
+            <app-anime-list [user]="selectedUser.name"
+                            (listClosed)="selectedUser = null"
+                            animate.enter="anime-list-enter"/>
         </div>
     }
 </body>
