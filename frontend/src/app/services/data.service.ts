@@ -11,10 +11,12 @@ export class DataService {
   private firestoreService: FirestoreService = inject(FirestoreService);
 
   getUserData(): Observable<User[]> {
-    return this.getDataFromCache('userDataList', this.initUsersListCache);
+    //TODO: Handle cache delete if there is newer data in firestore
+    return this.getDataFromCache('userDataList', () => this.initUsersListCache());
   }
 
   getAnimeData(userName: string): Observable<Anime[]> {
+    //TODO: Handle cache delete if there is newer data in firestore
     return this.getDataFromCache(userName + '_animeDataList', () => this.initAnimeListCache(userName));
   }
 
@@ -37,7 +39,7 @@ export class DataService {
 
   private initAnimeListCache(userName: string): Observable<Anime[]> {
     return this.firestoreService.getAnimeList(userName).pipe(
-        map(animes => [...animes].sort((a, b) => b.point - a.point)),
+        map(animes => [...animes].sort((a, b) => b.rating - a.rating)),
         tap(animes => localStorage.setItem(userName + '_animeDataList', JSON.stringify(animes)))
     );
   }
