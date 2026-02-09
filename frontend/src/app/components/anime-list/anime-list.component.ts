@@ -44,10 +44,6 @@ export class AnimeListComponent {
     this.animes$ = this.dataService.getAnimeData(this.user);
   }
 
-  constructor() {
-    this.animes$ = this.dataService.getAnimeData(this.user);
-  }
-
   private getOrderedAnimes(): Observable<any[]> {
     return this.dataService.getAnimeData(this.user).pipe(
       map(animes => this.filterAndSortAnimes(animes))

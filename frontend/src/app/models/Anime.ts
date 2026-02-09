@@ -2,5 +2,5 @@ export interface Anime {
     id: number;
     title: string;
     rating: number;
-    image: string;
+    picture: string;
 }

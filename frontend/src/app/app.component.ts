@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
-import { UserCardComponent } from "./components/main/user-card/user-card.component";
+import {Component, inject} from '@angular/core';
+import { UserCardComponent } from "./components/user-card/user-card.component";
 import {map, Observable} from 'rxjs';
-import { FirestoreService } from './services/firestore.service';
 import { CommonModule } from '@angular/common';
-import {AnimeListComponent} from "./components/main/anime-list/anime-list.component";
-import {Anime} from "./models/Anime";
+import {AnimeListComponent} from "./components/anime-list/anime-list.component";
 import {User} from "./models/User";
+import {DataService} from "./services/data.service";
 
 
 @Component({
@@ -15,19 +14,13 @@ import {User} from "./models/User";
     styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'unique-anime';
-  users$: Observable<User[]>;
-  animes$: Observable<Anime[]> | null = null;
-  count = 1;
-  selectedUser: User | null = null;
+    dataService: DataService = inject(DataService);
 
-  constructor(private fsService: FirestoreService){
-    this.users$ = this.fsService.getUserList().pipe(
-      map((users: User[]) => users.sort((a: User, b: User) => b.unique - a.unique))
-    );
-    //console.log(this.users$);
-    //this.animes$ = this.fsService.getAnimeList("");
-    //this.selectedUser = ""
+    users$: Observable<User[]>;
+    selectedUser: User | null = null;
+
+  constructor(){
+    this.users$ = this.dataService.getUserData();
   }
 
   onUserCardClick(user: User): void {
