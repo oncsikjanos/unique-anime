@@ -1,5 +1,4 @@
-import {Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
-import {FirestoreService} from "../../../services/firestore.service";
+import {Component, EventEmitter, inject, Input, Output, SimpleChanges} from '@angular/core';
 import {map, Observable} from "rxjs";
 import { AsyncPipe, CommonModule } from "@angular/common";
 import {MatCard} from "@angular/material/card";
@@ -8,7 +7,8 @@ import {MatIcon} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatSelectModule} from "@angular/material/select";
 import {FormsModule} from "@angular/forms";
-import {Anime} from "../../../models/Anime";
+import {Anime} from "../../models/Anime";
+import {DataService} from "../../services/data.service";
 
 @Component({
     selector: 'app-anime-list',
@@ -26,9 +26,12 @@ import {Anime} from "../../../models/Anime";
     styleUrl: './anime-list.component.scss'
 })
 export class AnimeListComponent {
+  @Input({'required': true}) user: string = "";
   @Output() listClosed = new EventEmitter<void>();
 
-  animes$: Observable<any[]>;
+  private dataService: DataService = inject(DataService);
+
+  animes$: Observable<Anime[]> = new Observable<Anime[]>();
   orders= [
     {value: 'name', viewValue: 'Name'},
     {value: 'point', viewValue: 'Point'},
@@ -37,20 +40,16 @@ export class AnimeListComponent {
   increase = false;
   searchTerm = "";
 
-  @Input({'required': true}) user: string = "";
-
-  constructor(private fsService: FirestoreService) {
-    this.animes$ = this.getOrderedAnimes();
+  ngAfterViewInit() {
+    this.animes$ = this.dataService.getAnimeData(this.user);
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['user']) {
-      this.animes$ = this.getOrderedAnimes();
-    }
+  constructor() {
+    this.animes$ = this.dataService.getAnimeData(this.user);
   }
 
   private getOrderedAnimes(): Observable<any[]> {
-    return this.fsService.getAnimeList(this.user).pipe(
+    return this.dataService.getAnimeData(this.user).pipe(
       map(animes => this.filterAndSortAnimes(animes))
     );
   }
