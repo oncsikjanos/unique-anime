@@ -23,7 +23,7 @@ export class AppComponent {
   users$: Observable<any[]>;
   animes$: Observable<any[]> | null = null;
   count = 1;
-  selectedUser: any = "szbalcsi";
+  selectedUser: User | null = null;
 
   constructor(private fsService: FirestoreService){
     this.users$ = this.fsService.getUserList().pipe(
@@ -35,6 +35,7 @@ export class AppComponent {
   }
 
   onUserCardClick(user: User): void {
+    console.log("CLIECKED"+user.name)
     this.selectedUser = user;
   }
 
