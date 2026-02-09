@@ -27,3 +27,12 @@
   min-width: 100%;
   font-size: xxx-large;
 }
+
+.anime-list-enter {
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
