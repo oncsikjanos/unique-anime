@@ -66,3 +66,15 @@ a:hover, a:focus, a:active {
   flex-direction: row;
   gap: 10px
 }
+
+.anime-list {
+  background: white;
+  width: 50vw;
+  height: 95vh;
+  overflow: auto;
+  position: fixed;
+  top: 2.5vh;
+  left: 25vw;
+  display: flex;
+  z-index: 1000;
+}
