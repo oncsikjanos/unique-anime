@@ -76,5 +76,16 @@ a:hover, a:focus, a:active {
   top: 2.5vh;
   left: 25vw;
   display: flex;
+  z-index: 1001;
+}
+
+.anime-overlay{
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 2.5vh;
+  background: rgba(0,0,0,0.35);
   z-index: 1000;
 }
