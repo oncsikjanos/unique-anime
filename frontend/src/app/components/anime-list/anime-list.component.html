@@ -1,7 +1,8 @@
-<mat-card class="anime-list">
+<div class="anime-overlay" (click)="onBackdropClick($event)">
+  <mat-card class="anime-list" (click)="$event.stopPropagation()">
     <div class="list-header">
       <h2>{{ user }} unique animes</h2>
-      <button mat-icon-button (click)="listClosed.emit()">
+      <button mat-icon-button (click)="closeList()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -44,4 +45,5 @@
     </a>
     }
     </div>
-</mat-card>
+  </mat-card>
+</div>

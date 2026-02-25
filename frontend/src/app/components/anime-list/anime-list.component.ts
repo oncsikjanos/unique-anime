@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, Input, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, inject, Input, Output, SimpleChanges, OnDestroy} from '@angular/core';
 import {map, Observable} from "rxjs";
 import { AsyncPipe, CommonModule } from "@angular/common";
 import {MatCard} from "@angular/material/card";
@@ -23,7 +23,7 @@ import {DataService} from "../../services/data.service";
         FormsModule
     ],
     templateUrl: './anime-list.component.html',
-    styleUrl: './anime-list.component.scss'
+    styleUrls: ['./anime-list.component.scss']
 })
 export class AnimeListComponent {
   @Input({'required': true}) user: string = "";
@@ -42,6 +42,24 @@ export class AnimeListComponent {
 
   ngAfterViewInit() {
     this.animes$ = this.dataService.getAnimeData(this.user);
+    document.body.classList.add('no-scroll');
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('no-scroll');
+  }
+
+  closeList(){
+    this.removeBodyLock();
+    this.listClosed.emit();
+  }
+
+  onBackdropClick(event: Event){
+    this.closeList();
+  }
+
+  private removeBodyLock(){
+    document.body.classList.remove('no-scroll');
   }
 
   private getOrderedAnimes(): Observable<any[]> {
