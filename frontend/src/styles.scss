@@ -6,3 +6,16 @@ body { margin: 0; font-family: "New Amsterdam", sans-serif; }
 body.no-scroll {
 	overflow: hidden;
 }
+
+/* Global box-sizing and responsive base font */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+	--base-font-size: 16px;
+	font-size: var(--base-font-size);
+}
+
+@media (max-width: 600px) {
+	:root { --base-font-size: 14px; }
+	body { padding: 8px; }
+}
