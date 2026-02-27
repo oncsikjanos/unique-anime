@@ -1,15 +1,17 @@
 import {Component, Input, SimpleChanges} from '@angular/core';
-import {MatCard} from '@angular/material/card';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-user-card',
     imports: [
-        MatCard,
-        CommonModule
+      MatCardModule,
+      MatIconModule,
+      CommonModule
     ],
     templateUrl: './user-card.component.html',
-    styleUrl: './user-card.component.scss'
+    styleUrls: ['./user-card.component.scss']
 })
 export class UserCardComponent {
   defaultUser = {'pfp': 's', 'name': 's', 'completed': 1, 'unique': 1}

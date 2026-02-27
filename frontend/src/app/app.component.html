@@ -4,9 +4,10 @@
 <body>
     <div class="user-list-container">
       @for (user of (users$ | async); let i = $index; track user) {
-        <app-user-card [user]="user"
-          [placement]="i+1"
-          (click)="onUserCardClick(user)"
+        <app-user-card 
+        [user]="user"
+        [placement]="i+1"
+        (click)="onUserCardClick(user)"
         [class.selected]="isSelected(user)"></app-user-card>
       }
     </div>
