@@ -1,0 +1,17 @@
+<div [class]="['podium-slot', slotClass]">
+    @if (placement === 1) {
+        <div class="crown">★</div>
+    }
+    <a class="slot-link" [routerLink]="['/user', name]">
+    <div [class]="['medal', medalClass]">{{ placement }}</div>
+    <div [class]="['avatar-ring', ringClass]">
+        <img [src]="pfp" [alt]="name" /> <!-- TODO: default pfp shared location -->
+    </div>
+    <div [class]="['slot-name', bigForFirsPlacement]">{{ name }}</div>
+    <div class="slot-stats">
+        <span class="stat unique">{{ uniqueAnimeCount}} Unique</span>
+        <span class="stat completed">{{ completedAnimeCount }} Completed</span>
+    </div>
+    </a>
+    <div [class]="['pillar', pillarClass]"><span>{{ placement }}</span></div>
+</div>

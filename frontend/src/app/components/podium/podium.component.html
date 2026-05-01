@@ -1,0 +1,15 @@
+@if (podium$ | async; as podium) {
+    @if (podium.length === 3) {
+      <section class="podium" aria-label="Top 3">
+        @for (user of podium; track user.name; let idx = $index) {
+          <app-podium-element 
+            [pfp]="user.pfp || 'assets/images/mate.jpg'" 
+            [name]="user.name"
+            [uniqueAnimeCount]="user.unique" 
+            [completedAnimeCount]="user.completed" 
+            [placement]="idx + 1">
+          </app-podium-element>
+        }
+      </section>
+    }
+  }
