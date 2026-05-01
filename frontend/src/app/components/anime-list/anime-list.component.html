@@ -1,49 +1,51 @@
-<div class="anime-overlay" (click)="onBackdropClick($event)">
-  <mat-card class="anime-list" (click)="$event.stopPropagation()">
-    <div class="list-header">
-      <h2>{{ user }} unique animes</h2>
-      <button mat-icon-button (click)="closeList()">
-        <mat-icon>close</mat-icon>
+<div class="anime-page">
+  <header class="anime-header">
+    <a class="back-btn" routerLink="/" aria-label="Back to leaderboard">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Leaderboard</span>
+    </a>
+    <h1 class="user-title">
+      <span class="user-title-name">{{ user }}</span>
+      <span class="user-title-suffix">unique animes</span>
+    </h1>
+  </header>
+
+  <div class="controls">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        placeholder="Search anime..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="sort-controls">
+      <label class="sort-label">Sort by</label>
+      <mat-select class="sort-select" [(value)]="selectedOrder" (valueChange)="onSelectionChange()">
+        @for (order of orders; track order.value) {
+          <mat-option [value]="order.value">{{ order.viewValue }}</mat-option>
+        }
+      </mat-select>
+      <button mat-icon-button class="order-btn" (click)="onOrderingClick()" [attr.aria-label]="increase ? 'Ascending' : 'Descending'">
+        <mat-icon>{{ increase ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</mat-icon>
       </button>
     </div>
-    <div class="search-box">
-        <input
-                type="text"
-                [(ngModel)]="searchTerm"
-                (input)="onSearchChange()"
-                placeholder="Search anime..."
-                class="search-input"
-        />
-    </div>
-    <div class="sort-header">
-        <div class="order-selector">
-            <label>Order by:</label>
-            <mat-select [(value)]="selectedOrder" (valueChange)="onSelectionChange()">
-                @for(order of orders; track order){
-                    <mat-option [value]="order.value">{{order.viewValue}}</mat-option>
-                }
-            </mat-select>
+  </div>
+
+  <div class="anime-grid">
+    @for (anime of animes$ | async; track anime.id) {
+      <a class="anime-card" target="_blank" [href]="'https://myanimelist.net/anime/' + anime.id">
+        <div class="anime-image-wrap">
+          <img [src]="anime.picture" [alt]="anime.title + ' picture'" />
+          <div class="rating-pill">{{ anime.rating }}</div>
         </div>
-        @if (increase){
-            <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_up</mat-icon></button>
-        }
-        @else{
-            <button mat-icon-button (click)="onOrderingClick()"><mat-icon>keyboard_arrow_down</mat-icon></button>
-        }
-    </div>
-    <div class="anime-container">
-    @for (anime of (animes$ | async); track anime) {
-    <a class="anime-holder" target="_blank"
-      [href]="'https://myanimelist.net/anime/'+anime.id">
-      <div class="picture-name-holder">
-        <div class="anime-picture">
-          <img [src]="anime.picture" [alt]="anime.title+' picture'"/>
-        </div>
-        <div class="anime-name">{{anime.title}}</div>
-      </div>
-      <div class="anime-rating">{{anime.rating}}</div>
-    </a>
+        <div class="anime-title">{{ anime.title }}</div>
+      </a>
+    } @empty {
+      <div class="empty">No anime to show</div>
     }
-    </div>
-  </mat-card>
+  </div>
 </div>

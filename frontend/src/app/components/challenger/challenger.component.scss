@@ -1,0 +1,30 @@
+.rest-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  color: var(--text-dim);
+  font-family: 'New Amsterdam', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+}
+
+.rest-divider::before,
+.rest-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-soft), transparent);
+}
+
+.rest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rest-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}

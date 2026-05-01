@@ -3,7 +3,7 @@
       <section class="podium" aria-label="Top 3">
         @for (user of podium; track user.name; let idx = $index) {
           <app-podium-element 
-            [pfp]="user.pfp || 'assets/images/mate.jpg'" 
+            [pfp]="user.pfp || 'https://cdn.pfps.gg/pfps/6779-fat-guy.png'" 
             [name]="user.name"
             [uniqueAnimeCount]="user.unique" 
             [completedAnimeCount]="user.completed" 

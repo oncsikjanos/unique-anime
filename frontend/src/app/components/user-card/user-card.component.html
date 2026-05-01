@@ -1,13 +1,13 @@
-<mat-card class="user-container" [ngStyle]="{'background-color': color}">
+<div class="user-container">
   <div class="user-pfp">
-    <img [src]='user.pfp == null ? "assets/images/mate.jpg" : user.pfp' [alt]="user.name+' pfp'"/>
-    <div class="placement-badge">{{placement}}</div>
+    <img [src]="user.pfp || 'https://cdn.pfps.gg/pfps/6779-fat-guy.png'" [alt]="user.name + ' pfp'" />
+    <div class="placement-badge">{{ placement }}</div>
   </div>
   <div class="user-info">
-    <div class="user-name">{{user.name}}</div>
+    <div class="user-name">{{ user.name }}</div>
     <div class="user-stats">
-      <span class="badge completed">Completed <strong>{{user.completed}}</strong></span>
-      <span class="badge unique">Unique <strong>{{user.unique}}</strong></span>
+      <span class="badge unique">Unique <strong>{{ user.unique }}</strong></span>
+      <span class="badge completed">Completed <strong>{{ user.completed }}</strong></span>
     </div>
   </div>
-</mat-card>
+</div>

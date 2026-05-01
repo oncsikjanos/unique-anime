@@ -1,0 +1,14 @@
+  @if ((users$ | async)?.length) {
+    <section class="rest">
+      <div class="rest-divider">
+        <span>Challengers</span>
+      </div>
+      <div class="rest-list">
+        @for (user of users$ | async; let i = $index; track user.name) {
+          <a class="rest-link" [routerLink]="['/user', user.name]">
+            <app-user-card [user]="user" [placement]="i + 4"></app-user-card>
+          </a>
+        }
+      </div>
+    </section>
+  }
