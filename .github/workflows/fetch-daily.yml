@@ -1,0 +1,41 @@
+name: Daily anime fetch
+
+on:
+  schedule:
+    - cron: '0 4 * * *'   # every day at 04:00 UTC (06:00 Budapest in summer)
+  workflow_dispatch:       # allow manual trigger from GitHub UI
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: fetch
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: fetch/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write Firebase service account
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "$RUNNER_TEMP/firebase-sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-sa.json" >> "$GITHUB_ENV"
+      - name: Write MAL token file
+        run: |
+          mkdir -p authentication
+          echo '${{ secrets.MAL_TOKEN_JSON }}' > authentication/token_myanimelist.json
+
+      - name: Run fetch
+        env:
+          MAL_USERS: ${{ secrets.MAL_USERS }}
+        run: python execute.py
