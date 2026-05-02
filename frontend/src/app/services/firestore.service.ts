@@ -3,6 +3,7 @@ import { collection, collectionData, Firestore } from '@angular/fire/firestore';
 import {Observable} from "rxjs";
 import {User} from "../models/User";
 import {Anime} from "../models/Anime";
+import { LastUpdated } from '../models/LastUpdated';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,10 @@ export class FirestoreService {
 
   getAnimeList(user: string): Observable<Anime[]> {
     return this.getDataFromFirestore<Anime>("Anime/"+user+"/Uniques");
+  }
+
+  getLastUpdated(): Observable<LastUpdated[]> {
+    return this.getDataFromFirestore<LastUpdated>('UploadDate');
   }
 
   private getDataFromFirestore<T>(collectionPath: string): Observable<T[]> {
