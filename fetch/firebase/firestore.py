@@ -1,22 +1,18 @@
+import json
+import os
+
 import firebase_admin
 from firebase_admin import firestore
 from firebase_admin import credentials
 from google.cloud.firestore_v1 import FieldFilter, DocumentSnapshot
-import animeListRequest
 from model.anime import Anime
 from model.user import User
-import os
 
-DIR_PATH = os.path.dirname(os.path.realpath(__file__))
-# Prefer path from environment for flexibility in dev/CI containers
-DEFAULT_AUTH_FILE = os.path.join(DIR_PATH, 'toxictsuniqueanime-firebase-adminsdk-vrgl3-7c62d95c53.json')
-AUTH_FILE = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', DEFAULT_AUTH_FILE)
+service_account_json = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
+if not service_account_json:
+    raise EnvironmentError('FIREBASE_SERVICE_ACCOUNT environment variable is not set')
 
-# Fail fast if the chosen auth file does not exist
-if not os.path.exists(AUTH_FILE):
-    raise FileNotFoundError(f'Firebase auth file not found: {AUTH_FILE} (set GOOGLE_APPLICATION_CREDENTIALS)')
-
-cred = credentials.Certificate(AUTH_FILE)
+cred = credentials.Certificate(json.loads(service_account_json))
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -138,3 +134,31 @@ def get_user_anime_data(user_name: str | None = None) -> list[Anime] | dict[str,
             user_unique_animes = [_convert_anime_data(doc) for doc in unique_collection.stream()]
             users_uniques.update({user.id: user_unique_animes})
     return users_uniques
+
+def update_last_updated():
+    doc_ref = db.collection('UploadDate').document('upload_date')
+    doc_ref.set({'timestamp': firestore.SERVER_TIMESTAMP})
+
+
+def get_anime_cache():
+    cache = {}
+    for doc in db.collection("AnimeCache").stream():
+        cache[doc.id] = doc.to_dict()
+    return cache
+
+
+def upload_anime_cache(anime_list):
+    if not anime_list:
+        return
+    collection_ref = db.collection("AnimeCache")
+    batch = db.batch()
+    count = 0
+    for anime_data in anime_list:
+        doc_ref = collection_ref.document(str(anime_data["id"]))
+        batch.set(doc_ref, anime_data)
+        count += 1
+        if count % 500 == 0:
+            batch.commit()
+            batch = db.batch()
+    if count % 500 != 0:
+        batch.commit()

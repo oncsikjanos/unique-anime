@@ -4,22 +4,19 @@ from requests.exceptions import HTTPError
 from authentication import authCodeGenerator as authGen
 import os
 import logging
+from urllib.parse import urlencode
 
 
 def authorize():
     code_verifier = authGen.generate_code_verifier()
-    payload = {'response_type': 'code',
-               'client_id': '82afa89d009d84b460c3f0cd41082a4a',
-               'code_challenge': code_verifier,
-               'code_challenge_method': 'plain'}
-    anime_list_request = requests.get("https://myanimelist.net/v1/oauth2/authorize", params=payload)
-    try:
-        anime_list_request.raise_for_status()
-    except HTTPError as e:
-        logging.warning(e)
-    print(anime_list_request.url)
-    print(f"request: {anime_list_request}")
-    print(f"response: {anime_list_request.text}")
+    params = {'response_type': 'code',
+              'client_id': '82afa89d009d84b460c3f0cd41082a4a',
+              'code_challenge': code_verifier,
+              'code_challenge_method': 'plain'}
+    url = f"https://myanimelist.net/v1/oauth2/authorize?{urlencode(params)}"
+    print("Open this URL in your browser, log in, approve, then copy the 'code' query param from the redirect:")
+    print(url)
+    return url
 
 # Gets the auth_token from myanimelist
 def get_auth_code(auth_code):
@@ -28,7 +25,7 @@ def get_auth_code(auth_code):
                'client_secret': '***REMOVED-MAL-CLIENT-SECRET***',
                'grant_type': 'authorization_code',
                'code': auth_code,
-               'code_verifier': authGen.get_code_verifier()}
+               'code_verifier': 'rSs6V5FS~cBqbibKmrkqchHGY9gjGz1V~1Qd_M~x4XaW5i2-OGbuIiRqSBqVSRTs1rGb~TSDBy4DOgnxLMqdFJ45MigUuqccA3hiJnQPCOBbwm1Lqr'}
     token_request = requests.post(url, data=payload)
     if token_request.status_code == 200:
         data = token_request.json()
@@ -39,9 +36,10 @@ def get_auth_code(auth_code):
 
 
 def get_access_token():
-    with open('authentication/token_myanimelist.json') as json_file:
-        json_data = json.load(json_file)
-    return json_data['access_token']
+    token_json = os.environ.get('MAL_TOKEN_JSON')
+    if not token_json:
+        raise EnvironmentError('MAL_TOKEN_JSON environment variable is not set')
+    return json.loads(token_json)['access_token']
 
 
 def refresh_token(auth_code):
@@ -59,7 +57,8 @@ def refresh_token(auth_code):
                'grant_type': 'refresh_token',
                'refresh_token': api_refresh_token,
                'code': code,
-               'code_verifier': authGen.get_code_verifier()}
+               'code_verifier': 'rSs6V5FS~cBqbibKmrkqchHGY9gjGz1V~1Qd_M~x4XaW5i2-OGbuIiRqSBqVSRTs1rGb~TSDBy4DOgnxLMqdFJ45MigUuqccA3hiJnQPCOBbwm1Lqr'
+     } #authGen.get_code_verifier()}
     headers = {'Host': 'https://toxictsuniqueanime.web.app/',
                'Content-Type': 'application/x-www-form-urlencoded'}
 
@@ -74,3 +73,5 @@ def refresh_token(auth_code):
     except HTTPError as e:
         logging.warning(e)
     return False
+
+# get_auth_code('***REMOVED-MAL-TOKEN***')

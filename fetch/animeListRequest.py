@@ -1,14 +1,17 @@
 import time
 
 import requests
-import json
 from requests.exceptions  import HTTPError
 import logging
 from authentication import auth
+from firebase import firestore as fs
 import os
 
-code = "" # TODO: get it form env file
-users = [] # TODO: get it from env file
+users = [u.strip() for u in os.environ.get('MAL_USERS', '').split(',') if u.strip()]
+ANIMELIST_URL_TEMPLATE = os.environ.get(
+    'MAL_ANIMELIST_URL',
+    'https://api.myanimelist.net/v2/users/{user}/animelist'
+)
 testAnime = {'id': "test",
              'title': "test",
              'picture': "test"}
@@ -16,7 +19,11 @@ episode_req = 0
 min_req = 0
 movie_min_req = 0
 
-def get_anime_list(user, url=''):
+anime_cache = {}
+animes_watched_by_user = {}
+new_animes = []
+
+def get_anime_list(user, url='', retries=3):
     payload = {'status': 'completed',
                'sort': 'anime_title',
                'limit': 1000,
@@ -24,10 +31,20 @@ def get_anime_list(user, url=''):
     headers = {'Authorization': f'Bearer {auth.get_access_token()}'}
 
     if url == '':
-        url = f"" # TODO: get it from env file
+        url = ANIMELIST_URL_TEMPLATE.format(user=user)
 
-    anime_list_request = requests.get(url, params=payload, headers=headers)
+    try:
+        anime_list_request = requests.get(url, params=payload, headers=headers, timeout=30)
+    except requests.exceptions.RequestException as e:
+        if retries > 0:
+            wait = 2 ** (4 - retries)
+            print(f"Network error for user {user}: {e}. Retrying in {wait}s ({retries} left)")
+            time.sleep(wait)
+            return get_anime_list(user, url=url, retries=retries - 1)
+        print(f"Giving up on user {user} after network failures: {e}")
+        return
 
+    time.sleep(1.0)
     try:
         anime_list_request.raise_for_status()
 
@@ -43,11 +60,7 @@ def get_anime_list(user, url=''):
 
 def get_animes_from_json(json_data, user):
     length = -1
-    anime_add_list = []
-    anime_json = {}
     watched_anime_ids = []
-
-    #time.sleep(.4)
 
     try:
         length = len(json_data['data'])
@@ -55,50 +68,26 @@ def get_animes_from_json(json_data, user):
         print(f"Querry error: {e}")
 
     try:
-        with open('anime_datas.json', 'r') as read_anime_datas:
-            anime_json = json.load(read_anime_datas)
-    except Exception as e:
-        with open("anime_datas.json", 'w') as create_anime_datas:
-            print(f"anime_datas.json not found: {e}")
-            json.dump({}, create_anime_datas, indent=4)
-
-    try:
         for i in range(length):
             anime_id = json_data['data'][i]['node']['id']
             print(f"anime_id: {anime_id} , watched by: {user}")
             watched_anime_ids.append(str(anime_id))
-            if str(anime_id) not in anime_json:
+            if str(anime_id) not in anime_cache:
                 anime_data = querry_anime_by_id(anime_id)
-                anime_add_list.append(anime_data)
+                if anime_data is not None:
+                    formatted = format_anime_data(anime_data)
+                    anime_cache[str(anime_id)] = formatted
+                    new_animes.append(formatted)
     except Exception as e:
         print(f"Error occurred while processing anime data: {e}")
 
-    write_anime_into_json(anime_add_list)
-    write_user_into_json(user, watched_anime_ids)
+    add_user_watched_animes(user, watched_anime_ids)
 
     try:
         url = json_data['paging']['next']
         get_anime_list(user, url)
     except Exception as e:
         print(f'Error occured/ got the last anime {e}')
-
-
-def write_anime_into_json(anime_list):
-    anime_data = {}
-
-    try:
-        with open('anime_datas.json', 'r') as read:
-            anime_data = json.load(read)
-    except FileNotFoundError as e:
-        with open('anime_datas.json', 'w') as create:
-            json.dump(anime_data, create, indent=4)
-
-    for data in anime_list:
-        if str(data['id']) not in anime_data:
-            anime_data[str(data['id'])] = format_anime_data(data)
-
-    with open('anime_datas.json', 'w') as write_animes:
-        json.dump(anime_data, write_animes, indent=4)
 
 
 def get_uniques():
@@ -109,34 +98,45 @@ def get_uniques():
                      "unique": 0,
                      "completed": 0}
 
-    with open('anime_datas.json', 'r') as read_anime:
-        anime_data = json.load(read_anime)
-    with open('anime_users.json', 'r') as read_ids:
-        user_ids = json.load(read_ids)
-
-    for anime_id in user_ids:
-        if len(user_ids[str(anime_id)]) < 2 and check_requirements_anime(anime_data[anime_id]):
-            ret[user_ids[str(anime_id)][0]]['animes'].append(anime_data[str(anime_id)])
-            ret[user_ids[str(anime_id)][0]]['completed'] += 1
-            ret[user_ids[str(anime_id)][0]]['unique'] += 1
+    for anime_id, watchers in animes_watched_by_user.items():
+        if len(watchers) < 2 and check_requirements_anime(anime_cache[anime_id]):
+            ret[watchers[0]]['animes'].append(anime_cache[anime_id])
+            ret[watchers[0]]['completed'] += 1
+            ret[watchers[0]]['unique'] += 1
         else:
-            for user in user_ids[str(anime_id)]:
+            for user in watchers:
                 ret[user]['completed'] += 1
 
     return ret
 
 
 def querry_animes():
+    global anime_cache, animes_watched_by_user, new_animes
+    anime_cache = fs.get_anime_cache()
+    animes_watched_by_user = {}
+    new_animes = []
+
     for user in users:
         get_anime_list(user)
 
+    fs.upload_anime_cache(new_animes)
 
-def querry_user(user):
+
+def querry_user(user, retries=3):
     url = f"https://api.jikan.moe/v4/users/{user}"
-    querry = requests.get(url)
-    json_data = querry.json()
-    return json_data["data"]["images"]["jpg"]["image_url"]
-
+    try:
+        querry = requests.get(url, timeout=30)
+        querry.raise_for_status()
+        json_data = querry.json()
+        return json_data["data"]["images"]["jpg"]["image_url"]
+    except (requests.exceptions.RequestException, KeyError) as e:
+        if retries > 0:
+            wait = 2 ** (4 - retries)
+            print(f"Network error fetching pfp for {user}: {e}. Retrying in {wait}s ({retries} left)")
+            time.sleep(wait)
+            return querry_user(user, retries - 1)
+        print(f"Giving up on pfp for {user}: {e}")
+        return None
 
 def get_users():
     return users
@@ -144,34 +144,37 @@ def get_users():
 
 def check_requirements_anime(anime_data):
     global min_req, episode_req, movie_min_req
-
-    #duriaton_at_least = 5400
-
-    #ret1 = anime_data['num_episodes'] >= 4 or anime_data['media_type'] == 'movie'
-    #ret2 = anime_data['num_episodes'] * anime_data['average_episode_duration'] >= duriaton_at_least
-    #ret3 = (anime_data['num_episodes'] * anime_data['average_episode_duration'] >= duriaton_at_least or
-    #        anime_data['media_type'] == 'movie')
-
     return anime_data['episodes'] >= 4 or anime_data['media'] == 'movie'
 
 
-def querry_anime_by_id(anime_id):
+def querry_anime_by_id(anime_id, retries=3):
     url = f"https://api.myanimelist.net/v2/anime/{anime_id}"
     payload = "fields=media_type,num_episodes,average_episode_duration,mean"
     headers = {'Authorization': f'Bearer {auth.get_access_token()}'}
 
-    anime_request = requests.get(url, params=payload, headers=headers)
-    time.sleep(0.2)
+    try:
+        anime_request = requests.get(url, params=payload, headers=headers, timeout=30)
+    except requests.exceptions.RequestException as e:
+        if retries > 0:
+            wait = 2 ** (4 - retries)
+            print(f"Network error for anime {anime_id}: {e}. Retrying in {wait}s ({retries} left)")
+            time.sleep(wait)
+            return querry_anime_by_id(anime_id, retries - 1)
+        print(f"Giving up on anime {anime_id} after network failures: {e}")
+        return None
+
+    time.sleep(1.0)
     if anime_request.status_code == 200:
         print(anime_request.json())
         return anime_request.json()
-    elif anime_request.status_code == 503:
-        print(anime_request.status_code)
-        print("503 Error in : querry_anime_by_id")
-        querry_anime_by_id(anime_id)
+    elif anime_request.status_code in (429, 500, 502, 503, 504) and retries > 0:
+        wait = 2 ** (4 - retries)
+        print(f"{anime_request.status_code} on anime {anime_id}, retrying in {wait}s ({retries} left)")
+        time.sleep(wait)
+        return querry_anime_by_id(anime_id, retries - 1)
     else:
-        print(f"Error occurred while processing anime data: {anime_id}")
-        print(anime_request.status_code)
+        print(f"Error occurred while processing anime data: {anime_id}, status: {anime_request.status_code}, body: {anime_request.text[:200]}")
+        return None
 
 
 def format_anime_data(anime_data):
@@ -186,21 +189,10 @@ def format_anime_data(anime_data):
     return formatted_anime_data
 
 
-def write_user_into_json(user, watched_anime_ids):
-    animes_watched_by_user = {}
-
-    try:
-        with open('anime_users.json', 'r') as read:
-            animes_watched_by_user = json.load(read)
-    except FileNotFoundError as e:
-        with open('anime_users.json', 'w') as create:
-            json.dump({}, create, indent=4)
-
+def add_user_watched_animes(user, watched_anime_ids):
     for anime_id in watched_anime_ids:
-        if str(anime_id) not in animes_watched_by_user:
-            animes_watched_by_user[str(anime_id)] = [user]
+        key = str(anime_id)
+        if key not in animes_watched_by_user:
+            animes_watched_by_user[key] = [user]
         else:
-            animes_watched_by_user[str(anime_id)].append(user)
-
-    with open('anime_users.json', 'w') as write_user:
-        json.dump(animes_watched_by_user, write_user, indent=4)
+            animes_watched_by_user[key].append(user)
