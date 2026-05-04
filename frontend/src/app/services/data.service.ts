@@ -44,7 +44,7 @@ export class DataService {
       switchMap(items => {
         const serverStamp = this.toStamp(items);
         const cached = localStorage.getItem(key);
-        const cachedStamp = localStorage.getItem('lastUpdated');
+        const cachedStamp = localStorage.getItem(key + '_lastUpdated');
 
         if (cached && cachedStamp === serverStamp) {
           return of(JSON.parse(cached) as T);
@@ -53,7 +53,7 @@ export class DataService {
         return fetcher().pipe(
           tap(data => {
             localStorage.setItem(key, JSON.stringify(data));
-            localStorage.setItem('lastUpdated', serverStamp);
+            localStorage.setItem(key + '_lastUpdated', serverStamp);
           })
         );
       }),
@@ -61,6 +61,7 @@ export class DataService {
         const cached = localStorage.getItem(key);
         return cached ? of(JSON.parse(cached) as T) : fetcher();
       })
+
     );
   }
 
