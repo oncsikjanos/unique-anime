@@ -53,3 +53,31 @@ jobs:
           else
             echo "No rotated token file found; refresh did not run. Skipping."
           fi
+
+  check-pat-expiry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Warn if GH_PAT is close to expiring
+        # Fails when the PAT is within 7 days of expiry. A failed scheduled run
+        # makes GitHub email the workflow's last committer, so you get a heads-up
+        # in time to rotate GH_PAT before the token refresh silently breaks.
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          exp=$(gh api -i user 2>/dev/null \
+            | tr -d '\r' \
+            | awk -F': ' 'tolower($1)=="github-authentication-token-expiration"{print $2}')
+          if [ -z "$exp" ]; then
+            echo "::warning::Could not read GH_PAT expiration (request failed, or a classic token without expiry)."
+            exit 0
+          fi
+          exp_epoch=$(date -d "$exp" +%s) || { echo "::warning::Could not parse expiration '$exp'"; exit 0; }
+          days_left=$(( (exp_epoch - $(date +%s)) / 86400 ))
+          echo "GH_PAT expires on $exp ($days_left days left)."
+          if [ "$days_left" -le 7 ]; then
+            echo "::error::GH_PAT expires in $days_left day(s) on $exp. Rotate it or the daily MAL token refresh will break."
+            exit 1
+          fi
+          if [ "$days_left" -le 21 ]; then
+            echo "::warning::GH_PAT expires in $days_left day(s) on $exp. Plan to rotate it soon."
+          fi
