@@ -1,38 +1,16 @@
 import json
-import requests
-from requests.exceptions import HTTPError
-from authentication import authCodeGenerator as authGen
 import os
-import logging
-from urllib.parse import urlencode
+import requests
 
+# client_id is not secret (it is sent to the browser in the authorize URL), so a
+# default is fine; client_secret must come from the environment / GitHub secret.
+CLIENT_ID = os.environ.get('MAL_CLIENT_ID', '82afa89d009d84b460c3f0cd41082a4a')
+CLIENT_SECRET = os.environ.get('MAL_CLIENT_SECRET')
 
-def authorize():
-    code_verifier = authGen.generate_code_verifier()
-    params = {'response_type': 'code',
-              'client_id': '82afa89d009d84b460c3f0cd41082a4a',
-              'code_challenge': code_verifier,
-              'code_challenge_method': 'plain'}
-    url = f"https://myanimelist.net/v1/oauth2/authorize?{urlencode(params)}"
-    print("Open this URL in your browser, log in, approve, then copy the 'code' query param from the redirect:")
-    print(url)
-    return url
-
-# Gets the auth_token from myanimelist
-def get_auth_code(auth_code):
-    url = "https://myanimelist.net/v1/oauth2/token"
-    payload = {'client_id': '82afa89d009d84b460c3f0cd41082a4a',
-               'client_secret': '***REMOVED-MAL-CLIENT-SECRET***',
-               'grant_type': 'authorization_code',
-               'code': auth_code,
-               'code_verifier': 'rSs6V5FS~cBqbibKmrkqchHGY9gjGz1V~1Qd_M~x4XaW5i2-OGbuIiRqSBqVSRTs1rGb~TSDBy4DOgnxLMqdFJ45MigUuqccA3hiJnQPCOBbwm1Lqr'}
-    token_request = requests.post(url, data=payload)
-    if token_request.status_code == 200:
-        data = token_request.json()
-        file_path = 'token_myanimelist.json'
-        with open(file_path, 'w') as json_file:
-            json.dump(data, json_file, indent=4)
-    print(token_request.text)
+TOKEN_URL = "https://myanimelist.net/v1/oauth2/token"
+# Written by refresh_access_token() so the workflow can push the rotated token
+# back into the MAL_TOKEN secret. Gitignored.
+TOKEN_FILE = 'token_myanimelist.json'
 
 
 def get_access_token():
@@ -42,36 +20,32 @@ def get_access_token():
     return json.loads(token_json)['access_token']
 
 
-def refresh_token(auth_code):
-    if not os.path.isfile('authentication/token_myanimelist.json'):
-        logging.warning('Cant refresh token_myanimelist.json does not exist')
-        return False
+def refresh_access_token():
+    """Exchange the stored refresh_token for a fresh token.
 
-    with open('token_myanimelist.json') as json_file:
-        json_data = json.load(json_file)
+    MAL rotates the refresh_token on every call and invalidates the old one, so
+    the new token is persisted both in-process (MAL_TOKEN_JSON, for this run) and
+    to TOKEN_FILE (so the workflow can update the MAL_TOKEN secret for next time).
+    Returns the new token dict.
+    """
+    if not CLIENT_SECRET:
+        raise EnvironmentError('MAL_CLIENT_SECRET environment variable is not set')
 
-    api_refresh_token = json_data['refresh_token']
-    url = "https://myanimelist.net/v1/oauth2/token"
-    payload = {'client_id': '82afa89d009d84b460c3f0cd41082a4a',
-               'client_secret': '***REMOVED-MAL-CLIENT-SECRET***',
+    token_json = os.environ.get('MAL_TOKEN_JSON')
+    if not token_json:
+        raise EnvironmentError('MAL_TOKEN_JSON environment variable is not set')
+
+    payload = {'client_id': CLIENT_ID,
+               'client_secret': CLIENT_SECRET,
                'grant_type': 'refresh_token',
-               'refresh_token': api_refresh_token,
-               'code': code,
-               'code_verifier': 'rSs6V5FS~cBqbibKmrkqchHGY9gjGz1V~1Qd_M~x4XaW5i2-OGbuIiRqSBqVSRTs1rGb~TSDBy4DOgnxLMqdFJ45MigUuqccA3hiJnQPCOBbwm1Lqr'
-     } #authGen.get_code_verifier()}
-    headers = {'Host': 'https://toxictsuniqueanime.web.app/',
-               'Content-Type': 'application/x-www-form-urlencoded'}
+               'refresh_token': json.loads(token_json)['refresh_token']}
 
-    request = requests.post(url, data=payload, headers=headers)
-    try:
-        request.raise_for_status()
-        data = request.json()
-        file_path = 'token_myanimelist.json'
-        with open(file_path, 'w') as json_file:
-            json.dump(data, json_file, indent=4)
-        return True
-    except HTTPError as e:
-        logging.warning(e)
-    return False
+    response = requests.post(TOKEN_URL, data=payload, timeout=30)
+    response.raise_for_status()
+    new_token = response.json()
 
-# get_auth_code('***REMOVED-MAL-TOKEN***')
+    os.environ['MAL_TOKEN_JSON'] = json.dumps(new_token)
+    with open(TOKEN_FILE, 'w') as json_file:
+        json.dump(new_token, json_file, indent=4)
+
+    return new_token

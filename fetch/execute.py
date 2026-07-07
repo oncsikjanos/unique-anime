@@ -1,11 +1,18 @@
 import time
 
 import animeListRequest
-from firebase import firestore as fs
+from authentication import auth
+from firebase.firestore import FirestoreClient
 
+fs = FirestoreClient()
 users_data = {}
 
 if __name__ == "__main__":
+
+    # Rotate the MAL token first: this writes the new token to token_myanimelist.json
+    # so the workflow can push it back into the MAL_TOKEN secret even if the fetch
+    # below fails afterwards.
+    auth.refresh_access_token()
 
     existing_pfps = {}
     for doc in fs.db.collection("User").stream():

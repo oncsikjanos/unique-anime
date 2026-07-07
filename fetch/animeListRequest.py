@@ -4,7 +4,9 @@ import requests
 from requests.exceptions  import HTTPError
 import logging
 from authentication import auth
-from firebase import firestore as fs
+from firebase.firestore import FirestoreClient
+
+fs = FirestoreClient()
 import os
 
 users = [u.strip() for u in os.environ.get('MAL_USERS', '').split(',') if u.strip()]
@@ -52,8 +54,9 @@ def get_anime_list(user, url='', retries=3):
         get_animes_from_json(data, user)
     except HTTPError as e:
         if e.response.status_code == 401 and e.response.json()['error'] == 'invalid_token':
-            logging.warning("Refresh token expired, refereshing token")
-            #auth.refresh_token("TODO")
+            # The token is refreshed once at the start of execute.py, so a 401 here
+            # means even the fresh token is invalid (e.g. the refresh_token expired).
+            logging.warning("Access token invalid; re-run authentication/generate_token.py to reseed MAL_TOKEN")
         else:
             logging.error(f"{e.response.status_code} {e.response.text}")
 

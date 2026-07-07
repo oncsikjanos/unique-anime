@@ -31,9 +31,25 @@ jobs:
           MAL_USERS: ${{ secrets.MAL_USERS }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           MAL_TOKEN_JSON: ${{ secrets.MAL_TOKEN }}
+          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
         run: |
           echo "--- secret presence (true if non-empty) ---"
           echo "MAL_USERS set: ${{ secrets.MAL_USERS != '' }}"
           echo "FIREBASE_SERVICE_ACCOUNT set: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}"
-          echo "MAL_TOKEN set: ${{ secrets.MAL_TOKEN != '' }}" 
+          echo "MAL_TOKEN set: ${{ secrets.MAL_TOKEN != '' }}"
+          echo "MAL_CLIENT_SECRET set: ${{ secrets.MAL_CLIENT_SECRET != '' }}"
           python execute.py
+
+      - name: Persist rotated MAL token
+        # Runs even if the fetch failed: the refresh happens first, so the file
+        # holds a valid rotated token that must replace the now-invalid secret.
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -f token_myanimelist.json ]; then
+            gh secret set MAL_TOKEN --repo "$GITHUB_REPOSITORY" --body "$(cat token_myanimelist.json)"
+            echo "MAL_TOKEN secret updated."
+          else
+            echo "No rotated token file found; refresh did not run. Skipping."
+          fi
