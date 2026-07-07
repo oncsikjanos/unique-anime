@@ -1,8 +1,8 @@
 <div class="home">
   <header class="home-header">
-    <h1 class="title">Unique <span class="title-accent">Anime</span></h1>
+    <h1 class="title">Unique <span class="title-accent">Anime</span><span class="cursor">_</span></h1>
     @if (lastUpdatedDate$ | async; as lastUpdated) {
-      <p class="subtitle">Last updated · {{ lastUpdated | date:'yyyy.MM.dd' }}</p>
+      <p class="subtitle">&gt; last updated: {{ lastUpdated | date:'yyyy.MM.dd' }}</p>
     }
   </header>
   <app-podium [podium$]="podium$"></app-podium>
