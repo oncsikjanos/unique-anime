@@ -5,7 +5,13 @@
       <span>Leaderboard</span>
     </a>
     <h1 class="user-title">
-      <span class="user-title-name">{{ user }}</span>
+      <a
+        class="user-title-name"
+        target="_blank"
+        rel="noopener"
+        [href]="'https://myanimelist.net/profile/' + user"
+        [attr.aria-label]="user + ' on MyAnimeList'"
+      >{{ user }}</a>
       <span class="user-title-suffix">unique animes</span>
     </h1>
   </header>
