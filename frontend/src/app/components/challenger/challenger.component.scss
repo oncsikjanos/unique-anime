@@ -2,25 +2,33 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  margin: 24px 0;
-  color: var(--text-dim);
-  font-family: 'New Amsterdam', sans-serif;
-  font-size: 1.5rem;
+  margin: 32px 0 24px;
+  color: var(--accent-yellow);
+  font-family: var(--font-pixel);
+  font-size: 0.9rem;
   letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 #000;
 }
 
 .rest-divider::before,
 .rest-divider::after {
   content: '';
   flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-soft), transparent);
+  height: var(--px);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--border-soft) 0px,
+    var(--border-soft) 10px,
+    transparent 10px,
+    transparent 18px
+  );
 }
 
 .rest-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .rest-link {
